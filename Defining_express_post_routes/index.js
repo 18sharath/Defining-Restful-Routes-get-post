@@ -3,12 +3,13 @@ const { userInfo } = require('os');
 const app=express();
 const path=require('path');
 const  {v4 : uuidv4} =require('uuid');
+const methodOveride=require('method-override');
 app.use(express.urlencoded({extended:true})) 
 app.use(express.json());
 app.set('views',path.join(__dirname,'views'));
-app.set('view engine', 'ejs')
-
-const comments=[
+app.set('view engine', 'ejs');
+app.use(methodOveride('_method'))
+let comments=[
     {
         id:uuidv4(),
         username:'Tod',
@@ -49,12 +50,25 @@ const comment=comments.find(c=>c.id===(id));
 res.render('comments/show',{comment});
 
 })
+
 app.patch('/comments/:id',(req,res)=>{
     const {id}=req.params;
     const newcommontext=req.body.comment;
 const foundcomment=comments.find(c=>c.id===(id));
 foundcomment.comment=newcommontext;
-res.redirect('/comments');
+res.redirect('comments');
+})
+
+app.get('/comments/:id/edit',(req,res)=>{
+    const {id}=req.params;
+    const comment=comments.find(c=>c.id===id);
+    res.render('comments/edit',{comment});
+
+})
+app.delete('/comments/:id',(req,res)=>{
+    const {id}=req.params;
+    comments=comments.filter(c=>c.id!==id);
+    res.redirect('/comments');
 })
 app.post('/tacos' ,(req,res)=>{
     const {meat,qty}=req.body;
